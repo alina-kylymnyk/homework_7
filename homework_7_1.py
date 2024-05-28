@@ -67,6 +67,7 @@ class AddressBook:
 
     def find(self, name):
         return self.contacts.get(name)
+
     #
     # Додайте та адаптуйте до класу AddressBook нашу функцію з четвертого домашнього завдання, тиждень
     # 3, get_upcoming_birthdays, яка для контактів адресної книги повертає список користувачів, яких
@@ -112,7 +113,8 @@ def add_contact(args, book: AddressBook):
         record.add_phone(phone)
     return message
 
- # Додати дату народження для вказаного контакту.
+
+# Додати дату народження для вказаного контакту.
 @input_error
 def add_birthday(args, book: AddressBook):
     name, bday = args
@@ -121,6 +123,7 @@ def add_birthday(args, book: AddressBook):
         record.add_birthday(bday)
         return f"Birthday {bday} added to contact {name}"
     return f"Contact {name} not found"
+
 
 # Показати дату народження для вказаного контакту.
 @input_error
@@ -150,6 +153,37 @@ def parse_input(user_input):
     return command, args
 
 
+# Функція для зміни номеру телефону для вказаного контакту.
+@input_error
+def change_phone(args, book: AddressBook):
+    name, new_phone = args
+    record = book.find(name)
+    if record:
+        if len(record.phones) > 0:
+            record.phones[0].edit_phone(new_phone)
+            return f"Phone number for contact {name} changed to {new_phone}"
+        else:
+            record.add_phone(new_phone)
+            return f"Phone number for contact {name} added as {new_phone}"
+    return f"Contact {name} not found"
+
+# окрема функція
+@input_error
+def phone(args, book: AddressBook):
+    name = args[0]
+    record = book.find(name)
+    if record:
+        phones = ", ".join(p.value for p in record.phones)
+        return f"Phones for {name}: {phones}"
+    return f"Contact {name} not found"
+
+# окрема функція
+@input_error
+def all(book: AddressBook):
+    records = [str(record) for record in book.contacts.values()]
+    return "\n".join(records)
+
+
 def main():
     book = AddressBook()
     print("Welcome to the assistant bot!")
@@ -168,27 +202,13 @@ def main():
             print(add_contact(args, book))
 
         elif command.lower() == "change":
-            name, new_phone = args
-            record = book.find(name)
-            if record:
-                record.phones = [Phone(new_phone)]
-                print(f"Phone number for contact {name} changed to {new_phone}")
-            else:
-                print(f"Contact {name} not found")
+            print(change_phone(args, book))
 
         elif command.lower() == "phone":
-            name = args[0]
-            record = book.find(name)
-            if record:
-                phones = ", ".join(p.value for p in record.phones)
-                print(f"Phones for {name}: {phones}")
-            else:
-                print(f"Contact {name} not found")
+            print(phone(args, book))
 
         elif command.lower() == "all":
-            # реалізація
-            for record in book.contacts.values():
-                print(record)
+            print(all(book))
 
         elif command.lower() == "add-birthday":
             # реалізація
